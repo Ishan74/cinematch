@@ -700,25 +700,28 @@
   reveals.forEach(el => observer.observe(el));
 
   // Email signup handler
-  let count = 247;
-  function handleSignup(e, btnId, countId) {
-    e.preventDefault();
-    const btn = document.getElementById(btnId);
-    const countEl = document.getElementById(countId);
-    const heroCount = document.getElementById('heroCount');
-    const ctaCount = document.getElementById('ctaCount');
-
-    btn.textContent = '✓ You\'re on the list!';
-    btn.classList.add('success');
-    btn.disabled = true;
-    count++;
-    if (heroCount) heroCount.textContent = count;
-    if (ctaCount) ctaCount.textContent = count;
-
-    // TODO: Replace this with your actual form submission
-    // e.g. fetch('https://your-backend/signup', { method: 'POST', body: JSON.stringify({ email }) })
-    console.log('Email captured:', e.target.querySelector('input').value);
-  }
+ let count = 247;
+ function handleSignup(e, btnId, countId) {
+   e.preventDefault();
+   const btn = document.getElementById(btnId);
+   const heroCount = document.getElementById('heroCount');
+   const ctaCount = document.getElementById('ctaCount');
+   const email = e.target.querySelector('input').value;
+ 
+   const MAILCHIMP_URL = 'https://gmail.us13.list-manage.com/subscribe/post?u=75cb7f8cbd35e38519d6dcc7b&id=4125b19947&f_id=001490eaf0';
+ 
+   fetch(MAILCHIMP_URL + '&EMAIL=' + encodeURIComponent(email), {
+     method: 'POST',
+     mode: 'no-cors'
+   });
+ 
+   btn.textContent = '✓ You\'re on the list!';
+   btn.classList.add('success');
+   btn.disabled = true;
+   count++;
+   if (heroCount) heroCount.textContent = count;
+   if (ctaCount) ctaCount.textContent = count;
+ }
 
   // Smooth scroll for nav CTA
   document.querySelector('.nav-cta').addEventListener('click', e => {
