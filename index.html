@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CineMatch — Group Movie Night, Solved</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --red: #FF6B6B;
+    --red-dim: rgba(255,107,107,0.12);
+    --green: #4ade80;
+    --blue: #60a5fa;
+    --bg: #080810;
+    --surface: #11111c;
+    --surface2: #181825;
+    --border: rgba(255,255,255,0.07);
+    --text: #f0ede6;
+    --muted: #666672;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--bg);
+    color: var(--text);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── NOISE OVERLAY ── */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 40px;
+    background: rgba(8,8,16,0.8);
+    backdrop-filter: blur(16px);
+    border-bottom: 0.5px solid var(--border);
+  }
+  .logo { font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; }
+  .logo span { color: var(--red); }
+  .nav-cta {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 20px;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+  .nav-cta:hover { background: #ff5252; transform: scale(0.98); }
+
+  /* ── HERO ── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative;
+  }
+
+  .hero-glow {
+    position: absolute;
+    top: 20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(255,107,107,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--red-dim);
+    border: 0.5px solid rgba(255,107,107,0.3);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--red);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .hero h1 {
+    font-family: var(--font-display);
+    font-size: clamp(48px, 8vw, 88px);
+    font-weight: 800;
+    line-height: 1.0;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.6s 0.1s ease both;
+  }
+
+  .hero h1 em {
+    font-style: normal;
+    color: var(--red);
+    position: relative;
+  }
+
+  .hero-sub {
+    font-size: clamp(16px, 2vw, 20px);
+    color: var(--muted);
+    line-height: 1.6;
+    max-width: 520px;
+    margin-bottom: 48px;
+    font-weight: 300;
+    animation: fadeUp 0.6s 0.2s ease both;
+  }
+
+  /* ── EMAIL FORM ── */
+  .signup-form {
+    display: flex;
+    gap: 10px;
+    max-width: 440px;
+    width: 100%;
+    animation: fadeUp 0.6s 0.3s ease both;
+  }
+  .signup-form input {
+    flex: 1;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .signup-form input::placeholder { color: var(--muted); }
+  .signup-form input:focus { border-color: rgba(255,107,107,0.4); }
+  .signup-form button {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 24px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .signup-form button:hover { background: #ff5252; }
+  .signup-form button.success { background: var(--green); }
+
+  .signup-note {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 12px;
+    animation: fadeUp 0.6s 0.35s ease both;
+  }
+
+  /* ── PHONE MOCKUP ── */
+  .phone-wrap {
+    margin-top: 80px;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    animation: fadeUp 0.8s 0.4s ease both;
+  }
+  .phone-frame {
+    width: 260px;
+    background: #1a1a28;
+    border-radius: 36px;
+    border: 0.5px solid rgba(255,255,255,0.1);
+    overflow: hidden;
+    box-shadow: 0 40px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.04);
+    position: relative;
+  }
+  .phone-notch {
+    width: 80px; height: 20px;
+    background: #0a0a14;
+    border-radius: 0 0 12px 12px;
+    margin: 0 auto 0;
+    position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    z-index: 2;
+  }
+  .phone-screen { padding: 40px 16px 20px; }
+  .ps-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .ps-logo { font-family: var(--font-display); font-size: 14px; font-weight: 800; }
+  .ps-logo span { color: var(--red); }
+  .ps-session { font-size: 10px; color: var(--muted); }
+
+  .ps-card {
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 100%);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: hidden;
+    min-height: 160px;
+    display: flex; flex-direction: column; justify-content: flex-end;
+  }
+  .ps-card-badge {
+    position: absolute; top: 10px; left: 10px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 10px;
+    padding: 3px 8px;
+    font-size: 9px;
+    color: rgba(255,255,255,0.8);
+  }
+  .ps-card-rating {
+    position: absolute; top: 10px; right: 10px;
+    background: rgba(0,0,0,0.5);
+    border-radius: 10px;
+    padding: 3px 8px;
+    font-size: 9px;
+    color: #FFD700;
+  }
+  .ps-card-title { font-family: var(--font-display); font-size: 16px; font-weight: 800; }
+  .ps-card-sub { font-size: 9px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+  .ps-stamp {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg);
+    font-family: var(--font-display); font-size: 22px; font-weight: 800;
+    border: 3px solid var(--green);
+    color: var(--green);
+    padding: 4px 10px;
+    border-radius: 6px;
+    opacity: 0.9;
+  }
+
+  .ps-voters { display: flex; gap: 5px; margin-bottom: 10px; }
+  .ps-voter {
+    background: var(--surface2);
+    border-radius: 8px;
+    padding: 4px 8px;
+    font-size: 9px;
+    display: flex; align-items: center; gap: 3px;
+    border: 0.5px solid var(--border);
+  }
+  .dot { width: 5px; height: 5px; border-radius: 50%; }
+
+  .ps-btns { display: flex; justify-content: center; gap: 10px; }
+  .ps-btn {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    border: 0.5px solid;
+  }
+  .ps-btn-no { border-color: var(--red); color: var(--red); background: rgba(255,107,107,0.08); }
+  .ps-btn-yes { border-color: var(--green); color: var(--green); background: rgba(74,222,128,0.08); }
+
+  .phone-glow-left {
+    position: absolute; top: 50%; left: -120px; transform: translateY(-50%);
+    width: 200px; height: 400px;
+    background: radial-gradient(ellipse, rgba(255,107,107,0.08) 0%, transparent 70%);
+  }
+  .phone-glow-right {
+    position: absolute; top: 50%; right: -120px; transform: translateY(-50%);
+    width: 200px; height: 400px;
+    background: radial-gradient(ellipse, rgba(96,165,250,0.08) 0%, transparent 70%);
+  }
+
+  /* ── HOW IT WORKS ── */
+  section { padding: 100px 24px; max-width: 1000px; margin: 0 auto; }
+
+  .section-eyebrow {
+    font-size: 11px;
+    color: var(--red);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 12px;
+    text-align: center;
+  }
+  .section-title {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 5vw, 52px);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    text-align: center;
+    margin-bottom: 16px;
+  }
+  .section-sub {
+    font-size: 16px;
+    color: var(--muted);
+    text-align: center;
+    max-width: 480px;
+    margin: 0 auto 64px;
+    line-height: 1.6;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+  }
+  .step-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s;
+  }
+  .step-card:hover { border-color: rgba(255,107,107,0.3); }
+  .step-card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,107,107,0.3), transparent);
+  }
+  .step-num {
+    font-family: var(--font-display);
+    font-size: 64px;
+    font-weight: 800;
+    color: rgba(255,107,107,0.08);
+    line-height: 1;
+    margin-bottom: 12px;
+  }
+  .step-icon { font-size: 28px; margin-bottom: 12px; }
+  .step-title { font-family: var(--font-display); font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .step-desc { font-size: 14px; color: var(--muted); line-height: 1.6; }
+
+  /* ── FEATURES ── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .feat {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 24px 20px;
+    transition: all 0.2s;
+  }
+  .feat:hover { background: var(--surface2); transform: translateY(-2px); }
+  .feat-icon { font-size: 24px; margin-bottom: 12px; }
+  .feat-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .feat-desc { font-size: 13px; color: var(--muted); line-height: 1.5; }
+
+  /* ── SOCIAL PROOF ── */
+  .quotes { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .quote-card {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+  }
+  .quote-stars { color: #FFD700; font-size: 14px; margin-bottom: 10px; }
+  .quote-text { font-size: 14px; line-height: 1.6; color: rgba(240,237,230,0.8); margin-bottom: 14px; font-style: italic; }
+  .quote-author { font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 8px; }
+  .quote-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 700;
+  }
+
+  /* ── CTA ── */
+  .cta-section {
+    text-align: center;
+    padding: 100px 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .cta-section::before {
+    content: '';
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 500px; height: 300px;
+    background: radial-gradient(ellipse, rgba(255,107,107,0.1) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .cta-section .section-title { margin-bottom: 12px; }
+  .cta-section .section-sub { margin-bottom: 40px; }
+
+  .cta-form {
+    display: flex;
+    gap: 10px;
+    max-width: 440px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .cta-form input {
+    flex: 1;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 18px;
+    font-family: var(--font-body);
+    font-size: 15px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .cta-form input::placeholder { color: var(--muted); }
+  .cta-form input:focus { border-color: rgba(255,107,107,0.4); }
+  .cta-form button {
+    background: var(--red);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 14px 24px;
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .cta-form button:hover { background: #ff5252; }
+  .cta-form button.success { background: var(--green); }
+
+  /* ── FOOTER ── */
+  footer {
+    border-top: 0.5px solid var(--border);
+    padding: 32px 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  footer .logo { font-size: 18px; }
+  .footer-links { display: flex; gap: 24px; }
+  .footer-links a { font-size: 13px; color: var(--muted); text-decoration: none; }
+  .footer-links a:hover { color: var(--text); }
+  .footer-copy { font-size: 12px; color: var(--muted); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* ── MOBILE ── */
+  @media (max-width: 600px) {
+    nav { padding: 16px 20px; }
+    .signup-form { flex-direction: column; }
+    .signup-form button { width: 100%; }
+    footer { flex-direction: column; text-align: center; }
+    .footer-links { justify-content: center; }
+    .cta-form { flex-direction: column; }
+    .cta-form button { width: 100%; }
+  }
+
+  /* ── COUNT TICKER ── */
+  .signup-count {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--muted);
+    animation: fadeUp 0.6s 0.4s ease both;
+  }
+  .count-num { color: var(--text); font-weight: 500; }
+  .count-dots { display: flex; gap: 3px; }
+  .count-dot {
+    width: 20px; height: 20px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 9px; font-weight: 700;
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">Cine<span>Match</span></div>
+  <a href="#signup" class="nav-cta">Get early access</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-glow"></div>
+
+  <div class="hero-badge">🎬 Coming soon to iOS &amp; Android</div>
+
+  <h1>Stop arguing.<br>Start <em>watching</em>.</h1>
+
+  <p class="hero-sub">CineMatch is the Tinder for movies. Everyone in your group swipes — when you all like the same one, it's a match. Movie night, solved.</p>
+
+  <form class="signup-form" id="heroForm" onsubmit="handleSignup(event, 'heroBtn', 'heroCount')">
+    <input type="email" placeholder="your@email.com" required>
+    <button type="submit" id="heroBtn">Notify me →</button>
+  </form>
+  <p class="signup-note">Free forever for groups. No spam, ever.</p>
+
+  <div class="signup-count">
+    <div class="count-dots">
+      <div class="count-dot" style="background:rgba(255,107,107,0.2);color:#FF6B6B">A</div>
+      <div class="count-dot" style="background:rgba(96,165,250,0.2);color:#60a5fa;margin-left:-6px">S</div>
+      <div class="count-dot" style="background:rgba(74,222,128,0.2);color:#4ade80;margin-left:-6px">J</div>
+    </div>
+    <span><span class="count-num" id="heroCount">247</span> people already signed up</span>
+  </div>
+
+  <!-- PHONE MOCKUP -->
+  <div class="phone-wrap">
+    <div class="phone-glow-left"></div>
+    <div class="phone-glow-right"></div>
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="ps-header">
+          <div class="ps-logo">Cine<span>Match</span></div>
+          <div class="ps-session">3 watching · 6 swiped</div>
+        </div>
+        <div class="ps-voters">
+          <div class="ps-voter"><div class="dot" style="background:#FF6B6B"></div>Alex 👀</div>
+          <div class="ps-voter"><div class="dot" style="background:#60a5fa"></div>Sam ✅</div>
+          <div class="ps-voter"><div class="dot" style="background:#4ade80"></div>Jamie ✅</div>
+        </div>
+        <div class="ps-card">
+          <div class="ps-card-badge">Sci-Fi · Action</div>
+          <div class="ps-card-rating">★ 8.8</div>
+          <div class="ps-stamp">LIKE</div>
+          <div class="ps-card-title">Inception</div>
+          <div class="ps-card-sub">2010 · Christopher Nolan</div>
+        </div>
+        <div class="ps-btns">
+          <div class="ps-btn ps-btn-no">✕</div>
+          <div class="ps-btn ps-btn-yes">♥</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section>
+  <div class="section-eyebrow">How it works</div>
+  <h2 class="section-title reveal">Three steps to movie night</h2>
+  <p class="section-sub reveal">No more endless scrolling through Netflix together. CineMatch handles the decision.</p>
+
+  <div class="steps">
+    <div class="step-card reveal">
+      <div class="step-num">01</div>
+      <div class="step-icon">👥</div>
+      <div class="step-title">Create a group</div>
+      <div class="step-desc">Start a session and share a 6-digit code. Friends join instantly — no account needed to start swiping.</div>
+    </div>
+    <div class="step-card reveal">
+      <div class="step-num">02</div>
+      <div class="step-icon">👆</div>
+      <div class="step-title">Everyone swipes</div>
+      <div class="step-desc">Swipe right if you'd watch it, left if not. Filter by genre, mood, runtime, and streaming services you already have.</div>
+    </div>
+    <div class="step-card reveal">
+      <div class="step-num">03</div>
+      <div class="step-icon">🎉</div>
+      <div class="step-title">It's a match</div>
+      <div class="step-desc">When everyone likes the same movie, you get a match notification with exactly where to watch it tonight.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section>
+  <div class="section-eyebrow">Features</div>
+  <h2 class="section-title reveal">Built for real movie nights</h2>
+  <p class="section-sub reveal">Every detail designed around how groups actually make decisions.</p>
+
+  <div class="features-grid">
+    <div class="feat reveal">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-title">Real-time sync</div>
+      <div class="feat-desc">See your friends' votes live as they swipe. No refreshing, no waiting.</div>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-icon">📺</div>
+      <div class="feat-title">Streaming filter</div>
+      <div class="feat-desc">Only see movies on services your group actually has. No more "we don't have that."</div>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-icon">⭐</div>
+      <div class="feat-title">Super Like</div>
+      <div class="feat-desc">Flag the films you really want to watch. Breaks ties and sparks conversation.</div>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-icon">🎭</div>
+      <div class="feat-title">Mood matching</div>
+      <div class="feat-desc">Filter by genre, vibe, decade, runtime. Not always in the mood for a 3-hour epic.</div>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-icon">🕓</div>
+      <div class="feat-title">Watch history</div>
+      <div class="feat-desc">Never see a movie you've already watched together. Your group's history remembered.</div>
+    </div>
+    <div class="feat reveal">
+      <div class="feat-icon">📱</div>
+      <div class="feat-title">iOS &amp; Android</div>
+      <div class="feat-desc">Native apps for both platforms. Works across the table or across the country.</div>
+    </div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF -->
+<section>
+  <div class="section-eyebrow">Early reactions</div>
+  <h2 class="section-title reveal">People are excited</h2>
+  <p class="section-sub reveal">We shared the prototype. Here's what they said.</p>
+
+  <div class="quotes">
+    <div class="quote-card reveal">
+      <div class="quote-stars">★★★★★</div>
+      <p class="quote-text">"My flatmates and I spend more time choosing a movie than actually watching one. This solves that completely."</p>
+      <div class="quote-author">
+        <div class="quote-avatar" style="background:rgba(255,107,107,0.15);color:#FF6B6B">MR</div>
+        Maya R. · Sydney
+      </div>
+    </div>
+    <div class="quote-card reveal">
+      <div class="quote-stars">★★★★★</div>
+      <p class="quote-text">"The real-time voting thing is genius. You can see your partner swiping in real time. So fun."</p>
+      <div class="quote-author">
+        <div class="quote-avatar" style="background:rgba(96,165,250,0.15);color:#60a5fa">TK</div>
+        Tom K. · Melbourne
+      </div>
+    </div>
+    <div class="quote-card reveal">
+      <div class="quote-stars">★★★★★</div>
+      <p class="quote-text">"Used the prototype for our group chat. We actually matched on something in under 2 minutes. Unreal."</p>
+      <div class="quote-author">
+        <div class="quote-avatar" style="background:rgba(74,222,128,0.15);color:#4ade80">SL</div>
+        Sarah L. · Brisbane
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-section" id="signup">
+  <div class="section-eyebrow">Early access</div>
+  <h2 class="section-title reveal">Be first in line</h2>
+  <p class="section-sub reveal">Sign up and we'll notify you the moment CineMatch hits the App Store and Google Play. Early users get Pro free for 3 months.</p>
+
+  <form class="cta-form" id="ctaForm" onsubmit="handleSignup(event, 'ctaBtn', 'ctaCount')">
+    <input type="email" placeholder="your@email.com" required>
+    <button type="submit" id="ctaBtn">Get early access →</button>
+  </form>
+  <p class="signup-note" style="text-align:center;margin-top:12px;font-size:12px;color:var(--muted)">
+    <span id="ctaCount">247</span> people already on the list · No spam, ever
+  </p>
+</div>
+
+<footer>
+  <div class="logo">Cine<span>Match</span></div>
+  <div class="footer-links">
+    <a href="#">Privacy</a>
+    <a href="#">Contact</a>
+    <a href="https://twitter.com" target="_blank">Twitter</a>
+  </div>
+  <div class="footer-copy">© 2025 CineMatch. All rights reserved.</div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach((e, i) => {
+      if (e.isIntersecting) {
+        setTimeout(() => e.target.classList.add('visible'), i * 80);
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+
+  // Email signup handler
+  let count = 247;
+  function handleSignup(e, btnId, countId) {
+    e.preventDefault();
+    const btn = document.getElementById(btnId);
+    const countEl = document.getElementById(countId);
+    const heroCount = document.getElementById('heroCount');
+    const ctaCount = document.getElementById('ctaCount');
+
+    btn.textContent = '✓ You\'re on the list!';
+    btn.classList.add('success');
+    btn.disabled = true;
+    count++;
+    if (heroCount) heroCount.textContent = count;
+    if (ctaCount) ctaCount.textContent = count;
+
+    // TODO: Replace this with your actual form submission
+    // e.g. fetch('https://your-backend/signup', { method: 'POST', body: JSON.stringify({ email }) })
+    console.log('Email captured:', e.target.querySelector('input').value);
+  }
+
+  // Smooth scroll for nav CTA
+  document.querySelector('.nav-cta').addEventListener('click', e => {
+    e.preventDefault();
+    document.getElementById('signup').scrollIntoView({ behavior: 'smooth' });
+  });
+</script>
+
+</body>
+</html>
